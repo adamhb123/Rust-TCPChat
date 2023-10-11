@@ -1,10 +1,10 @@
-use tokio::net::TcpStream;
-use tokio::time::{Duration, sleep};
-use tokio::sync::Mutex;
-use std::sync::Arc;
-use tokio::io::{BufReader, AsyncBufReadExt, AsyncWriteExt};
 use std::error::Error;
-use std::io;
+use std::io::{self, Write};
+use std::sync::Arc;
+use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
+use tokio::net::TcpStream;
+use tokio::sync::Mutex;
+use tokio::time::{sleep, Duration};
 
 #[tokio::main]
 async fn main() {
@@ -23,22 +23,22 @@ async fn main() {
                         break;
                     }
                     let buf_string = String::from_utf8_lossy(&buf);
-                    println!(
-                        "Received message: {}",
-                        buf_string
-                    );
+                    println!("{}", buf_string);
                     buf.clear();
-                },
-                Err(e) => panic!("{:?}", e)
+                }
+                Err(e) => panic!("{:?}", e),
             }
         }
     });
     let writer_handle = tokio::spawn(async move {
         loop {
             io::stdin().read_line(&mut input_buffer).unwrap();
-            writer.writable().await;
-            writer.try_write(format!("{}", input_buffer.as_str()).as_bytes());
-        }}
-    );
-    loop {};
+            writer.writable().await.unwrap();
+            writer
+                .try_write(format!("{}", input_buffer.as_str()).as_bytes())
+                .unwrap();
+            input_buffer.clear();
+        }
+    });
+    loop {}
 }
