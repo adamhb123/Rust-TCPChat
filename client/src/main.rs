@@ -12,6 +12,9 @@ async fn main() {
     let (reader, writer) = stream.into_split();
     let mut input_buffer = String::new();
     let mut buf_reader = BufReader::new(reader);
+    let message_queue: Queue<String> = queue![];
+    let message_queue = Arc::new(Mutex::new(message_queue));
+
     let mut buf = vec![];
 
     let reader_handle = tokio::spawn(async move {
@@ -23,6 +26,8 @@ async fn main() {
                         break;
                     }
                     let buf_string = String::from_utf8_lossy(&buf);
+                    message_queue.lock().await.add(welcome_message).unwrap();
+
                     println!("{}", buf_string);
                     buf.clear();
                 }
@@ -40,5 +45,8 @@ async fn main() {
             input_buffer.clear();
         }
     });
-    loop {}
+    // GUI Display
+    loop {
+
+    }
 }
