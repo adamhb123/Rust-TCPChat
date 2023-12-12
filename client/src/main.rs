@@ -1,3 +1,4 @@
+use std::env;
 use std::error::Error;
 use std::io::{self, Write};
 use std::sync::Arc;
@@ -8,7 +9,8 @@ use tokio::time::{sleep, Duration};
 
 #[tokio::main]
 async fn main() {
-    let mut stream = TcpStream::connect("127.0.0.1:9000").await.unwrap();
+    let addr = env::args().nth(1).unwrap_or("127.0.0.1:9000".to_string());
+    let mut stream = TcpStream::connect(addr).await.unwrap();
     let (reader, writer) = stream.into_split();
     let mut input_buffer = String::new();
     let mut buf_reader = BufReader::new(reader);
